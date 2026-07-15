@@ -5,8 +5,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Employee;
 
-Route::redirect('/', '/login');
+Route::get('/', function () {
+    $employees = Employee::with('department')->latest()->get();
+    return view('welcome', compact('employees'));
+})->name('welcome');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

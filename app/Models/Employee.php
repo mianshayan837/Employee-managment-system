@@ -41,13 +41,15 @@ class Employee extends Model
     /**
      * Full public URL for the employee's profile image, or null.
      */
-    public function getProfileImageUrlAttribute(): ?string
-    {
-        return $this->profile_image
-            ? Storage::disk('public')->url($this->profile_image)
-            : null;
+ public function getProfileImageUrlAttribute(): ?string
+{
+    if (! $this->profile_image) {
+        return null;
     }
-
+    return str_starts_with($this->profile_image, 'http')
+        ? $this->profile_image
+        : Storage::disk('public')->url($this->profile_image);
+}
     public function scopeSearch($query, ?string $term)
     {
         if (! $term) {
