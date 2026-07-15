@@ -23,7 +23,6 @@
 
         <div class="d-flex align-items-center gap-2">
             <a href="{{ route('login') }}" class="btn btn-outline-ink btn-sm">Login</a>
-            <a href="{{ route('register') }}" class="btn btn-ink btn-sm">Register</a>
         </div>
     </nav>
 
