@@ -681,3 +681,35 @@ box-shadow:0 10px 20px rgba(0,0,0,.2);
     background-color: rgba(16, 25, 46, 0.05);
     color: var(--slate);
 }
+
+/* ---- Leave status pills (pending / approved / rejected) ---- */
+.leave-status-pill {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.leave-status-pill.pending  {
+     background-color: #DBEAFE; 
+     color: #1D4ED8;
+     }
+.leave-status-pill.success {
+     background-color: var(--success-soft); 
+     color: var(--success);
+     }
+.leave-status-pill.danger   {
+     background-color: #FEE2E2; 
+     color: #B91C1C;
+     }
+     .page-link{
+        color: #10233f !important;
+     }
+     .active>.page-link, .page-link.active{
+         background-color: #10233f !important; 
+         border-color :#10233f !important;
+         color:#ffff !important;
+     }

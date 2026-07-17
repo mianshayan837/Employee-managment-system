@@ -48,10 +48,30 @@
                     </span>
                     <input id="password_confirmation" type="password" name="password_confirmation" required
                         class="form-control" placeholder="Confirm Password">
+                         
                 </div>
+                 <p class="text-slate small mb-4 mt-2">Password must contain at least 8 characters.</p>
             </div>
         </div>
-        <p class="text-slate small mb-4 mt-2">Password must contain at least 8 characters.</p>
+        <div class="row g-3 mb-1">
+    <div class="col-md-6 mb-3">
+        <label for="department_id" class="label-mono form-label">Department</label>
+        <select id="department_id" name="department_id" required class="form-select">
+            <option value="">Select department</option>
+            @foreach ($departments as $dept)
+                <option value="{{ $dept->id }}" @selected(old('department_id') == $dept->id)>
+                    {{ $dept->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label for="designation" class="label-mono form-label">Designation</label>
+        <input id="designation" type="text" name="designation" value="{{ old('designation') }}" required
+            class="form-control" placeholder="e.g. Software Engineer">
+    </div>
+</div>
 
         <button type="submit" class="btn btn-ink w-100 py-2 fw-medium">
             Create Account <span class="text-brass">→</span>

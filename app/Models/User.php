@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -13,7 +14,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // 'admin' | 'manager'
+        'role', // 'admin' | 'employee'
     ];
 
     protected $hidden = [
@@ -32,5 +33,18 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isEmployee(): bool
+    {
+        return $this->role === 'employee';
+    }
+
+    /**
+     * Har user ka apna ek Employee record ho sakta hea (agar wo employee hea).
+     */
+    public function employee(): HasOne
+    {
+        return $this->hasOne(Employee::class);
     }
 }

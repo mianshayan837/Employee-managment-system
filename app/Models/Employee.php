@@ -12,18 +12,22 @@ class Employee extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'employee_code',
-        'department_id',
-        'name',
-        'email',
-        'phone',
-        'profile_image',
-        'designation',
-        'salary',
-        'joining_date',
-        'status', // 'active' | 'inactive'
-    ];
+   protected $fillable = [
+    'user_id',
+    'employee_code',
+    'department_id',
+    'name',
+    'email',
+    'phone',
+    'profile_image',
+    'designation',
+    'salary',
+    'joining_date',
+    'status',
+    'annual_leave_balance',
+    'sick_leave_balance',
+    'casual_leave_balance',
+];
 
     protected function casts(): array
     {
@@ -38,9 +42,16 @@ class Employee extends Model
         return $this->belongsTo(Department::class);
     }
 
-    /**
-     * Full public URL for the employee's profile image, or null.
-     */
+  public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+{
+    return $this->belongsTo(User::class);
+}
+
+public function leaveRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+{
+    return $this->hasMany(LeaveRequest::class);
+}
+
  public function getProfileImageUrlAttribute(): ?string
 {
     if (! $this->profile_image) {

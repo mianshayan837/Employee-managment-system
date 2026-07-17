@@ -4,6 +4,9 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeDashboardController;
+use App\Http\Controllers\LeaveApprovalController;
+use App\Http\Controllers\LeaveController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Employee;
 
@@ -25,6 +28,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // ---- Employee self-service area ----
+    Route::get('/my/dashboard', [EmployeeDashboardController::class, 'index'])->name('employees.dashboard');
+    Route::get('/my/leaves', [LeaveController::class, 'index'])->name('leaves.index');
+    Route::get('/my/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
+    Route::post('/my/leaves', [LeaveController::class, 'store'])->name('leaves.store');
+
     Route::resource('employees', EmployeeController::class)->except(['destroy']);
     Route::resource('departments', DepartmentController::class)->except(['destroy', 'show']);
 
@@ -43,5 +52,10 @@ Route::middleware('auth')->group(function () {
 
         Route::delete('/employees/{id}/force-delete', [EmployeeController::class, 'forceDelete'])
             ->name('employees.force-delete');
+
+        // ---- Leave approval (admin only) ----
+        Route::get('/leave-requests', [LeaveApprovalController::class, 'index'])->name('leave-requests.index');
+        Route::put('/leave-requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('leave-requests.approve');
+        Route::put('/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('leave-requests.reject');
     });
 });

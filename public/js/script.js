@@ -1,16 +1,22 @@
     document.addEventListener('DOMContentLoaded', function () {
-        const flashMessage = document.getElementById('flash-message');
+     
+    const flash = document.getElementById('flash-message');
 
-        if (flashMessage) {
-            setTimeout(function () {
-                flashMessage.style.transition = 'opacity 0.5s ease';
-                flashMessage.style.opacity = '0';
+    if (flash && typeof Toastify !== 'undefined') {
+        const isError = flash.dataset.type === 'error';
 
-                setTimeout(function () {
-                    flashMessage.remove();
-                }, 500);
-            }, 3000); 
-        }
+        Toastify({
+            text: flash.textContent.trim(),
+            duration: 3500,
+            gravity: 'top',
+            position: 'right',
+            style: {
+                background: isError
+                    ? 'linear-gradient(to right, #B3432D, #8C2F1F)'
+                    : 'linear-gradient(to right, #2F6B4F, #1F4A36)',
+            },
+        }).showToast();
+    }
 
 
           document.querySelectorAll('.team-row').forEach(function (row) {
@@ -57,5 +63,4 @@
                 window.addEventListener('resize', update);
                 update();
             });
-        
-        });
+});

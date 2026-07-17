@@ -35,21 +35,17 @@
 
                 <div class="p-4 ">
 
-                    @if(session('status'))
-                        <div class="alert alert-success" id="flash-message">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+                @if(session('status'))
+    <div id="flash-message" data-type="success" class="d-none">{{ session('status') }}</div>
+@endif
 
-                    @if($errors->any())
-                        <div class="alert alert-danger" id="flash-message">
-                            <ul class="mb-0 ps-3">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+@if(session('error'))
+    <div id="flash-message" data-type="error" class="d-none">{{ session('error') }}</div>
+@endif
+
+@if($errors->any())
+    <div id="flash-message" data-type="error" class="d-none">{{ $errors->first() }}</div>
+@endif
 
                     @yield('content')
 
