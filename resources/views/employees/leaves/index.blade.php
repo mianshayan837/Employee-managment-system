@@ -9,7 +9,7 @@
             <p class="eyebrow mb-2">History</p>
             <h1 class="font-display fw-semibold text-ink mb-0">My leave requests</h1>
         </div>
-        <a href="{{ route('leaves.create') }}" class="btn btn-ink"> <i class="fa-regular fa-calendar-days"></i> Apply Leave</a>
+        <a href="{{ route('leaves.create') }}" class="btn btn-ink"> <i class="fa-solid fa-person-walking-arrow-right"></i> Apply Leave</a>
     </div>
 
     <div class="panel">

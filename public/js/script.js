@@ -1,66 +1,66 @@
-    document.addEventListener('DOMContentLoaded', function () {
-     
-    const flash = document.getElementById('flash-message');
+document.addEventListener("DOMContentLoaded", function () {
+    const flash = document.getElementById("flash-message");
 
-    if (flash && typeof Toastify !== 'undefined') {
-        const isError = flash.dataset.type === 'error';
+    if (flash && typeof Toastify !== "undefined") {
+        const isError = flash.dataset.type === "error";
 
         Toastify({
             text: flash.textContent.trim(),
             duration: 3500,
-            gravity: 'top',
-            position: 'right',
+            gravity: "top",
+            position: "right",
             style: {
                 background: isError
-                    ? 'linear-gradient(to right, #B3432D, #8C2F1F)'
-                    : 'linear-gradient(to right, #2F6B4F, #1F4A36)',
+                    ? "linear-gradient(to right, #D30000, #D30000)"
+                    : "linear-gradient(to right, #D30000, #D30000)",
             },
         }).showToast();
     }
 
+    document.querySelectorAll(".team-row").forEach(function (row) {
+        const track = row.querySelector(".team-row-track");
+        const cards = Array.from(track.children);
+        const prevBtn = row.querySelector(".row-nav-prev");
+        const nextBtn = row.querySelector(".row-nav-next");
+        let page = 0;
 
-          document.querySelectorAll('.team-row').forEach(function (row) {
-                const track = row.querySelector('.team-row-track');
-                const cards = Array.from(track.children);
-                const prevBtn = row.querySelector('.row-nav-prev');
-                const nextBtn = row.querySelector('.row-nav-next');
-                let page = 0;
+        function getVisibleCount() {
+            const w = window.innerWidth;
+            if (w < 640) return 1;
+            if (w < 992) return 2;
+            return 3;
+        }
 
-                function getVisibleCount() {
-                    const w = window.innerWidth;
-                    if (w < 640) return 1;
-                    if (w < 992) return 2;
-                    return 3;
-                }
+        function update() {
+            const visible = getVisibleCount();
+            const maxPage = Math.max(0, Math.ceil(cards.length / visible) - 1);
+            page = Math.min(page, maxPage);
 
-                function update() {
-                    const visible = getVisibleCount();
-                    const maxPage = Math.max(0, Math.ceil(cards.length / visible) - 1);
-                    page = Math.min(page, maxPage);
+            const cardWidth = cards[0]
+                ? cards[0].getBoundingClientRect().width
+                : 0;
+            const gap = parseFloat(getComputedStyle(track).gap) || 0;
+            const offset = page * visible * (cardWidth + gap);
 
-                    const cardWidth = cards[0] ? cards[0].getBoundingClientRect().width : 0;
-                    const gap = parseFloat(getComputedStyle(track).gap) || 0;
-                    const offset = page * visible * (cardWidth + gap);
+            track.style.transform = "translateX(-" + offset + "px)";
 
-                    track.style.transform = 'translateX(-' + offset + 'px)';
+            prevBtn.disabled = page === 0;
+            nextBtn.disabled = page === maxPage;
+        }
 
-                    prevBtn.disabled = page === 0;
-                    nextBtn.disabled = page === maxPage;
-                }
+        prevBtn.addEventListener("click", function () {
+            page = Math.max(0, page - 1);
+            update();
+        });
 
-                prevBtn.addEventListener('click', function () {
-                    page = Math.max(0, page - 1);
-                    update();
-                });
+        nextBtn.addEventListener("click", function () {
+            const visible = getVisibleCount();
+            const maxPage = Math.max(0, Math.ceil(cards.length / visible) - 1);
+            page = Math.min(page + 1, maxPage);
+            update();
+        });
 
-                nextBtn.addEventListener('click', function () {
-                    const visible = getVisibleCount();
-                    const maxPage = Math.max(0, Math.ceil(cards.length / visible) - 1);
-                    page = Math.min(page + 1, maxPage);
-                    update();
-                });
-
-                window.addEventListener('resize', update);
-                update();
-            });
+        window.addEventListener("resize", update);
+        update();
+    });
 });

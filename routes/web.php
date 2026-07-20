@@ -7,6 +7,8 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeDashboardController;
 use App\Http\Controllers\LeaveApprovalController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceReportController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Employee;
 
@@ -34,6 +36,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/my/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
     Route::post('/my/leaves', [LeaveController::class, 'store'])->name('leaves.store');
 
+    // ---- Attendance (employee) ----
+Route::get('/my/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+Route::post('/my/attendance/check-in', [AttendanceController::class, 'checkIn'])->name('attendance.check-in');
+Route::post('/my/attendance/check-out', [AttendanceController::class, 'checkOut'])->name('attendance.check-out');
+Route::get('/my/attendance/calendar', [AttendanceController::class, 'calendar'])->name('attendance.calendar');
+
     Route::resource('employees', EmployeeController::class)->except(['destroy']);
     Route::resource('departments', DepartmentController::class)->except(['destroy', 'show']);
 
@@ -57,5 +65,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/leave-requests', [LeaveApprovalController::class, 'index'])->name('leave-requests.index');
         Route::put('/leave-requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('leave-requests.approve');
         Route::put('/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('leave-requests.reject');
+
+        // ---- Attendance reports (admin) ----
+Route::get('/attendance-report', [AttendanceReportController::class, 'today'])->name('attendance-report.today');
+Route::get('/attendance-report/{employee}', [AttendanceReportController::class, 'employee'])->name('attendance-report.employee');
     });
 });

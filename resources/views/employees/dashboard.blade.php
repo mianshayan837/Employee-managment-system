@@ -51,7 +51,7 @@
         <h5 class="mb-0">Recent Leave Requests</h5>
         <div class="d-flex gap-2">
            
-            <a href="{{ route('leaves.create') }}" class="btn btn-ink btn-sm"><i class="fa-regular fa-calendar-days"></i> Apply Leave </a>
+            <a href="{{ route('leaves.create') }}" class="btn btn-ink btn-sm"><i class="fa-solid fa-person-walking-arrow-right"></i> Apply Leave </a>
         </div>
     </div>
 

@@ -26,8 +26,8 @@
                     @forelse ($leaveRequests as $leave)
                         <tr>
                             <td class="ps-4">
-                                <p class="mb-0 fw-medium">{{ $leave->employee->name }}</p>
-                                <p class="mb-0 text-slate small">{{ $leave->employee->department->name ?? '—' }}</p>
+                                <p class="mb-0 fw-medium">{{ $leave->employee?->name }}</p>
+                                <p class="mb-0 text-slate small">{{ $leave->employee?->department->name ?? '—' }}</p>
                             </td>
                             <td>{{ ucfirst($leave->type) }}</td>
                             <td class="text-slate small">{{ $leave->start_date->format('d M') }} – {{ $leave->end_date->format('d M Y') }}</td>

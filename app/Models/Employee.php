@@ -52,6 +52,10 @@ public function leaveRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
     return $this->hasMany(LeaveRequest::class);
 }
 
+public function attendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+{
+    return $this->hasMany(Attendance::class);
+}
  public function getProfileImageUrlAttribute(): ?string
 {
     if (! $this->profile_image) {
