@@ -9,6 +9,7 @@ class Attendance extends Model
 {
     protected $fillable = [
         'employee_id',
+        'shift_id',
         'date',
         'check_in',
         'check_out',
@@ -29,7 +30,12 @@ class Attendance extends Model
     {
         return $this->belongsTo(Employee::class);
     }
-    
+
+    public function shift(): BelongsTo
+    {
+        return $this->belongsTo(Shift::class);
+    }
+
     public function statusColor(): string
     {
         return match ($this->status) {

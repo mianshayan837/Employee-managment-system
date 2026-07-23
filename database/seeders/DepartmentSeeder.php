@@ -16,6 +16,7 @@ class DepartmentSeeder extends Seeder
             ['name' => 'Finance', 'code' => 'FIN', 'description' => 'Accounting, payroll and budgeting.'],
             ['name' => 'Marketing', 'code' => 'MKT', 'description' => 'Brand, growth and communications.'],
             ['name' => 'Operations', 'code' => 'OPS', 'description' => 'Facilities and day-to-day operations.'],
+            
         ];
 
         foreach ($departments as $department) {

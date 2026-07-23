@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Employee;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class EmployeeController extends Controller
 {
@@ -28,13 +31,14 @@ class EmployeeController extends Controller
     public function create()
     {
         $departments = Department::orderBy('name')->get();
+        $shifts = \App\Models\Shift::orderBy('start_time')->get();
 
-        return view('employees.create', compact('departments'));
+        return view('employees.create', compact('departments', 'shifts'));
     }
 
     public function store(Request $request)
     {
-        $validated = $this->validated($request);
+        $validated = $this->validated($request, null, true);
         $validated['employee_code'] = $this->generateCode();
 
         if ($request->hasFile('profile_image')) {
@@ -42,15 +46,26 @@ class EmployeeController extends Controller
                 ->store('employees', 'public');
         }
 
+      
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'employee',
+        ]);
+
+        unset($validated['password']);
+        $validated['user_id'] = $user->id;
+
         Employee::create($validated);
 
         return redirect()->route('employees.index')
-            ->with('status', 'Employee '.$validated['name'].' has been added.');
+            ->with('status', 'Employee '.$validated['name'].' has been added with login access.');
     }
 
     public function show(Employee $employee)
     {
-        $employee->load('department');
+        $employee->load('department', 'shift');
 
         return view('employees.show', compact('employee'));
     }
@@ -58,13 +73,14 @@ class EmployeeController extends Controller
     public function edit(Employee $employee)
     {
         $departments = Department::orderBy('name')->get();
+        $shifts = \App\Models\Shift::orderBy('start_time')->get();
 
-        return view('employees.edit', compact('employee', 'departments'));
+        return view('employees.edit', compact('employee', 'departments', 'shifts'));
     }
 
     public function update(Request $request, Employee $employee)
     {
-        $validated = $this->validated($request, $employee->id);
+        $validated = $this->validated($request, $employee, false);
 
         if ($request->hasFile('profile_image')) {
             if ($employee->profile_image) {
@@ -74,15 +90,23 @@ class EmployeeController extends Controller
                 ->store('employees', 'public');
         }
 
+        $newPassword = $validated['password'] ?? null;
+        unset($validated['password']);
+
         $employee->update($validated);
+
+        if ($employee->user) {
+            $employee->user->update(array_filter([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => $newPassword ? Hash::make($newPassword) : null,
+            ]));
+        }
 
         return redirect()->route('employees.index')
             ->with('status', 'Employee '.$employee->name.' has been updated.');
     }
 
-    /**
-     * Soft delete — record database se nahi udta, sirf hide ho jata hea.
-     */
     public function destroy(Employee $employee)
     {
         $name = $employee->name;
@@ -93,9 +117,6 @@ class EmployeeController extends Controller
             ->with('status', 'Employee '.$name.' has been moved to trash.');
     }
 
-    /**
-     * Trashed (soft-deleted) employees ki list dikhata hea.
-     */
     public function trashed()
     {
         $employees = Employee::onlyTrashed()
@@ -106,9 +127,6 @@ class EmployeeController extends Controller
         return view('employees.trashed', compact('employees'));
     }
 
-    /**
-     * Ek soft-deleted employee ko wapas active kar deta hea.
-     */
     public function restore($id)
     {
         $employee = Employee::onlyTrashed()->findOrFail($id);
@@ -118,9 +136,6 @@ class EmployeeController extends Controller
             ->with('status', 'Employee '.$employee->name.' has been restored.');
     }
 
-    /**
-     * Employee ko hamesha ke liye delete kar deta hea (image bhi hata deta hea).
-     */
     public function forceDelete($id)
     {
         $employee = Employee::onlyTrashed()->findOrFail($id);
@@ -136,18 +151,27 @@ class EmployeeController extends Controller
             ->with('status', 'Employee '.$name.' has been permanently deleted.');
     }
 
-    private function validated(Request $request, ?int $ignoreId = null): array
+    private function validated(Request $request, ?Employee $employee = null, bool $requirePassword = false): array
     {
+        $ignoreId = $employee?->id;
+        $ignoreUserId = $employee?->user_id;
+
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:employees,email,'.$ignoreId],
+            'email' => [
+                'required', 'email', 'max:255',
+                Rule::unique('employees', 'email')->ignore($ignoreId),
+                Rule::unique('users', 'email')->ignore($ignoreUserId),
+            ],
             'phone' => ['nullable', 'string', 'max:30'],
             'department_id' => ['required', 'exists:departments,id'],
+            'shift_id' => ['required', 'exists:shifts,id'],
             'designation' => ['required', 'string', 'max:100'],
             'salary' => ['required', 'numeric', 'min:0'],
             'joining_date' => ['required', 'date'],
             'status' => ['required', 'in:active,inactive'],
             'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'password' => [$requirePassword ? 'required' : 'nullable', 'string', 'min:8'],
         ]);
     }
 

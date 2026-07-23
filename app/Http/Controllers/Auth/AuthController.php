@@ -44,60 +44,68 @@ class AuthController extends Controller
         return redirect()->intended($destination)
             ->with('status', 'Welcome back, '.Auth::user()->name.'.');
     }
+public function showRegister()
+{
+    $isFirstUser = User::query()->count() === 0;
+    $departments = Department::orderBy('name')->get();
+    $shifts = \App\Models\Shift::orderBy('start_time')->get();
 
-    public function showRegister()
-    {
-        $departments = Department::orderBy('name')->get();
+    return view('auth.register', compact('isFirstUser', 'departments', 'shifts'));
+}
 
-        return view('auth.register', compact('departments'));
+public function register(Request $request)
+{
+    $isFirstUser = User::query()->count() === 0;
+
+    $rules = [
+        'name' => ['required', 'string', 'max:255'],
+        'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+    ];
+
+
+    if (! $isFirstUser) {
+        $rules['department_id'] = ['required', 'exists:departments,id'];
+        $rules['shift_id'] = ['required', 'exists:shifts,id'];
+        $rules['designation'] = ['required', 'string', 'max:100'];
     }
 
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'department_id' => ['required', 'exists:departments,id'],
-            'designation' => ['required', 'string', 'max:100'],
+    $validated = $request->validate($rules);
+
+    $user = DB::transaction(function () use ($validated, $isFirstUser) {
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $isFirstUser ? 'admin' : 'employee',
         ]);
 
-        $user = DB::transaction(function () use ($validated) {
-            $isFirstUser = User::query()->count() === 0;
-
-            $user = User::create([
+        if (! $isFirstUser) {
+            Employee::create([
+                'user_id' => $user->id,
+                'employee_code' => $this->generateEmployeeCode(),
+                'department_id' => $validated['department_id'],
+                'shift_id' => $validated['shift_id'],
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'role' => $isFirstUser ? 'admin' : 'employee',
+                'designation' => $validated['designation'],
+                'salary' => 0,
+                'joining_date' => now()->toDateString(),
+                'status' => 'active',
             ]);
+        }
 
-            // Admin ka apna alag HR record nahi banta — sirf employees ka banta hea.
-            if (! $isFirstUser) {
-                Employee::create([
-                    'user_id' => $user->id,
-                    'employee_code' => $this->generateEmployeeCode(),
-                    'department_id' => $validated['department_id'],
-                    'name' => $validated['name'],
-                    'email' => $validated['email'],
-                    'designation' => $validated['designation'],
-                    'salary' => 0,
-                    'joining_date' => now()->toDateString(),
-                    'status' => 'active',
-                ]);
-            }
+        return $user;
+    });
 
-            return $user;
-        });
+    Auth::login($user);
+    $request->session()->regenerate();
 
-        Auth::login($user);
-        $request->session()->regenerate();
+    $destination = $user->isAdmin() ? route('dashboard') : route('employees.dashboard');
 
-        $destination = $user->isAdmin() ? route('dashboard') : route('employees.dashboard');
-
-        return redirect($destination)
-            ->with('status', 'Account created. Welcome to the team, '.$user->name.'.');
-    }
+    return redirect($destination)
+        ->with('status', 'Account created. Welcome to the team, '.$user->name.'.');
+}
 
     public function logout(Request $request)
     {

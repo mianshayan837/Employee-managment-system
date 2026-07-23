@@ -9,6 +9,7 @@ use App\Http\Controllers\LeaveApprovalController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceReportController;
+use App\Http\Controllers\ShiftController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Employee;
 
@@ -37,10 +38,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/my/leaves', [LeaveController::class, 'store'])->name('leaves.store');
 
     // ---- Attendance (employee) ----
-Route::get('/my/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-Route::post('/my/attendance/check-in', [AttendanceController::class, 'checkIn'])->name('attendance.check-in');
-Route::post('/my/attendance/check-out', [AttendanceController::class, 'checkOut'])->name('attendance.check-out');
-Route::get('/my/attendance/calendar', [AttendanceController::class, 'calendar'])->name('attendance.calendar');
+    Route::get('/my/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::post('/my/attendance/check-in', [AttendanceController::class, 'checkIn'])->name('attendance.check-in');
+    Route::post('/my/attendance/check-out', [AttendanceController::class, 'checkOut'])->name('attendance.check-out');
+    Route::get('/my/attendance/calendar', [AttendanceController::class, 'calendar'])->name('attendance.calendar');
 
     Route::resource('employees', EmployeeController::class)->except(['destroy']);
     Route::resource('departments', DepartmentController::class)->except(['destroy', 'show']);
@@ -67,7 +68,13 @@ Route::get('/my/attendance/calendar', [AttendanceController::class, 'calendar'])
         Route::put('/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('leave-requests.reject');
 
         // ---- Attendance reports (admin) ----
-Route::get('/attendance-report', [AttendanceReportController::class, 'today'])->name('attendance-report.today');
-Route::get('/attendance-report/{employee}', [AttendanceReportController::class, 'employee'])->name('attendance-report.employee');
+        Route::get('/attendance-report', [AttendanceReportController::class, 'today'])->name('attendance-report.today');
+        Route::get('/attendance-report/{employee}', [AttendanceReportController::class, 'employee'])->name('attendance-report.employee');
+        Route::put('/attendance-report/{employee}/{date}', [AttendanceReportController::class, 'updateStatus'])->name('attendance-report.update-status');
+
+        // ---- Shift management (admin) ----
+        Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
+        Route::get('/shifts/{shift}/edit', [ShiftController::class, 'edit'])->name('shifts.edit');
+        Route::put('/shifts/{shift}', [ShiftController::class, 'update'])->name('shifts.update');
     });
 });

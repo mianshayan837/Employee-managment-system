@@ -10,16 +10,9 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-   
-    private const WORK_START = '12:00:00';
-    private const WORK_END = '18:00:00';
-    private const GRACE_MINUTES = 15;
-    private const HALF_DAY_MINUTES = 4 * 60; 
-
-    
     public function index(Request $request)
     {
-        $employee = Auth::user()->employee;
+        $employee = Auth::user()->employee()->with('shift')->first();
 
         $today = Attendance::where('employee_id', $employee->id)
             ->whereDate('date', today())
@@ -33,7 +26,25 @@ class AttendanceController extends Controller
 
    public function checkIn()
 {
-    $employee = Auth::user()->employee;
+    $employee = Auth::user()->employee()->with('shift')->first();
+
+    if (! $employee->shift) {
+        return back()->with('error', 'No shift assigned to you. Please contact the admin.');
+    }
+
+    $shift = $employee->shift;
+    $now = Carbon::now();
+    $workStart = Carbon::parse($shift->start_time);
+    $workEnd = Carbon::parse($shift->end_time);
+
+  
+    if ($now->format('H:i:s') < $workStart->format('H:i:s')) {
+        return back()->with('error', 'Your shift ('.$shift->timeRangeLabel().') has not started yet. You can check in from '.$workStart->format('h:i A').' onwards.');
+    }
+
+    if ($now->format('H:i:s') > $workEnd->format('H:i:s')) {
+        return back()->with('error', 'Your shift ('.$shift->timeRangeLabel().') has already ended. Check-in window is closed for today.');
+    }
 
     $existing = Attendance::where('employee_id', $employee->id)
         ->whereDate('date', today())
@@ -43,8 +54,7 @@ class AttendanceController extends Controller
         return back()->with('error', 'You have already checked in today.');
     }
 
-   
-    $onLeaveToday = \App\Models\LeaveRequest::where('employee_id', $employee->id)
+    $onLeaveToday = LeaveRequest::where('employee_id', $employee->id)
         ->where('status', 'approved')
         ->where('start_date', '<=', today())
         ->where('end_date', '>=', today())
@@ -54,9 +64,7 @@ class AttendanceController extends Controller
         return back()->with('error', 'You are on approved leave today. Check-in is not allowed.');
     }
 
-    $now = Carbon::now();
-    $workStart = Carbon::parse(self::WORK_START);
-    $graceLimit = $workStart->copy()->addMinutes(self::GRACE_MINUTES);
+    $graceLimit = $workStart->copy()->addMinutes($shift->grace_minutes);
 
     $lateMinutes = 0;
     $status = 'present';
@@ -68,6 +76,7 @@ class AttendanceController extends Controller
 
     Attendance::create([
         'employee_id' => $employee->id,
+        'shift_id' => $shift->id,
         'date' => today(),
         'check_in' => $now->format('H:i:s'),
         'status' => $status,
@@ -83,6 +92,7 @@ class AttendanceController extends Controller
 
         $attendance = Attendance::where('employee_id', $employee->id)
             ->whereDate('date', today())
+            ->with('shift')
             ->first();
 
         if (! $attendance || ! $attendance->check_in) {
@@ -93,19 +103,22 @@ class AttendanceController extends Controller
             return back()->with('error', 'You have already checked out today.');
         }
 
+        $shift = $attendance->shift ?? $employee->shift;
+
         $now = Carbon::now();
         $checkIn = Carbon::parse($attendance->check_in);
         $workedMinutes = $checkIn->diffInMinutes($now);
 
-        $workEnd = Carbon::parse(self::WORK_END);
+        $workEnd = Carbon::parse($shift->end_time);
         $overtimeMinutes = 0;
         if ($now->format('H:i:s') > $workEnd->format('H:i:s')) {
             $overtimeMinutes = $workEnd->diffInMinutes($now);
         }
 
-  
+        $halfDayThreshold = $shift->halfDayThresholdMinutes();
+
         $status = $attendance->status;
-        if ($workedMinutes < self::HALF_DAY_MINUTES) {
+        if ($workedMinutes < $halfDayThreshold) {
             $status = 'half_day';
         }
 
@@ -119,7 +132,6 @@ class AttendanceController extends Controller
         return back()->with('status', 'Checked out successfully at '.$now->format('h:i A').'.');
     }
 
- 
     public function calendar(Request $request)
     {
         $employee = Auth::user()->employee;

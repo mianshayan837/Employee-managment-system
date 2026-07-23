@@ -12,22 +12,23 @@ class Employee extends Model
 {
     use HasFactory, SoftDeletes;
 
-   protected $fillable = [
-    'user_id',
-    'employee_code',
-    'department_id',
-    'name',
-    'email',
-    'phone',
-    'profile_image',
-    'designation',
-    'salary',
-    'joining_date',
-    'status',
-    'annual_leave_balance',
-    'sick_leave_balance',
-    'casual_leave_balance',
-];
+    protected $fillable = [
+        'user_id',
+        'employee_code',
+        'department_id',
+        'shift_id',
+        'name',
+        'email',
+        'phone',
+        'profile_image',
+        'designation',
+        'salary',
+        'joining_date',
+        'status',
+        'annual_leave_balance',
+        'sick_leave_balance',
+        'casual_leave_balance',
+    ];
 
     protected function casts(): array
     {
@@ -42,29 +43,36 @@ class Employee extends Model
         return $this->belongsTo(Department::class);
     }
 
-  public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-{
-    return $this->belongsTo(User::class);
-}
-
-public function leaveRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
-{
-    return $this->hasMany(LeaveRequest::class);
-}
-
-public function attendances(): \Illuminate\Database\Eloquent\Relations\HasMany
-{
-    return $this->hasMany(Attendance::class);
-}
- public function getProfileImageUrlAttribute(): ?string
-{
-    if (! $this->profile_image) {
-        return null;
+    public function shift(): BelongsTo
+    {
+        return $this->belongsTo(Shift::class);
     }
-    return str_starts_with($this->profile_image, 'http')
-        ? $this->profile_image
-        : Storage::disk('public')->url($this->profile_image);
-}
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function leaveRequests(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
+    public function attendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function getProfileImageUrlAttribute(): ?string
+    {
+        if (! $this->profile_image) {
+            return null;
+        }
+        return str_starts_with($this->profile_image, 'http')
+            ? $this->profile_image
+            : Storage::disk('public')->url($this->profile_image);
+    }
+
     public function scopeSearch($query, ?string $term)
     {
         if (! $term) {

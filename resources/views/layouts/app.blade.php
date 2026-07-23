@@ -55,6 +55,10 @@
                         class="sidebar-link {{ request()->routeIs('attendance-report.*') ? 'active' : '' }}">
                         <i class="fa-solid fa-clipboard-user"></i> Attendance
                     </a>
+                    <a href="{{ route('shifts.index') }}"
+                        class="sidebar-link {{ request()->routeIs('shifts.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-clock"></i> Shifts
+                    </a>
                 @else
                     <a href="{{ route('employees.dashboard') }}"
                         class="sidebar-link {{ request()->routeIs('employees.dashboard') ? 'active' : '' }}">

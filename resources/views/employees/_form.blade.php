@@ -40,6 +40,14 @@
     </div>
 
     <div class="col-md-6">
+    <label for="password" class="label-mono form-label">
+        Password {{ isset($employee) ? '(leave blank to keep unchanged)' : '' }}
+    </label>
+    <input type="password" id="password" name="password" class="form-control"
+           placeholder="{{ isset($employee) ? 'Leave blank to keep unchanged' : 'Minimum 8 characters' }}">
+</div>
+
+    <div class="col-md-6">
         <label for="phone" class="label-mono form-label">Phone</label>
         <input id="phone" type="text" name="phone" value="{{ old('phone', $employee->phone ?? '') }}"
             class="form-control" placeholder="Enter Your Mobile Number">
@@ -56,6 +64,18 @@
             @endforeach
         </select>
     </div>
+
+    <div class="col-md-6">
+    <label for="shift_id" class="label-mono form-label">Shift</label>
+    <select id="shift_id" name="shift_id" required class="form-select">
+        <option value="">Select shift</option>
+        @foreach ($shifts as $shift)
+            <option value="{{ $shift->id }}" @selected(old('shift_id', $employee->shift_id ?? '') == $shift->id)>
+                {{ $shift->name }} ({{ $shift->timeRangeLabel() }})
+            </option>
+        @endforeach
+    </select>
+</div>
 
     <div class="col-md-6">
         <label for="designation" class="label-mono form-label">Designation</label>
