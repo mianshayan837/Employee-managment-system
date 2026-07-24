@@ -51,6 +51,10 @@
                         class="sidebar-link {{ request()->routeIs('leave-requests.*') ? 'active' : '' }}">
                         <i class="fa-solid fa-code-pull-request"></i> Leave Requests
                     </a>
+                    <a href="{{ route('leave-settings.edit') }}"
+                        class="sidebar-link {{ request()->routeIs('leave-settings.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-sliders"></i> Leave Settings
+                    </a>
                     <a href="{{ route('attendance-report.today') }}"
                         class="sidebar-link {{ request()->routeIs('attendance-report.*') ? 'active' : '' }}">
                         <i class="fa-solid fa-clipboard-user"></i> Attendance

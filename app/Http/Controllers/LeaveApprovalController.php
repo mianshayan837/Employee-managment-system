@@ -24,8 +24,13 @@ class LeaveApprovalController extends Controller
         }
 
         $employee = $leaveRequest->employee;
-        $balanceField = $leaveRequest->type.'_leave_balance';
-        $employee->decrement($balanceField, $leaveRequest->days);
+        $remaining = $employee->remainingLeaveDays($leaveRequest->type);
+
+        if ($remaining < $leaveRequest->days) {
+            return back()->with('error',
+                $employee->name.' does not have enough '.$leaveRequest->type.' leave balance to approve this request.'
+            );
+        }
 
         $leaveRequest->update([
             'status' => 'approved',

@@ -10,6 +10,7 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\LeaveSettingController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Employee;
 
@@ -62,7 +63,11 @@ Route::middleware('auth')->group(function () {
         Route::delete('/employees/{id}/force-delete', [EmployeeController::class, 'forceDelete'])
             ->name('employees.force-delete');
 
-        // ---- Leave approval (admin only) ----
+            
+        Route::get('/leave-settings', [LeaveSettingController::class, 'edit'])->name('leave-settings.edit');
+        Route::put('/leave-settings', [LeaveSettingController::class, 'update'])->name('leave-settings.update');
+
+        
         Route::get('/leave-requests', [LeaveApprovalController::class, 'index'])->name('leave-requests.index');
         Route::put('/leave-requests/{leaveRequest}/approve', [LeaveApprovalController::class, 'approve'])->name('leave-requests.approve');
         Route::put('/leave-requests/{leaveRequest}/reject', [LeaveApprovalController::class, 'reject'])->name('leave-requests.reject');

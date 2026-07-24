@@ -989,9 +989,7 @@ hr.border-dashed {
     gap: 0.4rem;
 }
 
-/* ==========================================================================
-   Shift Management Cards — animated, premium look
-   ========================================================================== */
+
 
 .shift-card {
     position: relative;
@@ -1013,7 +1011,7 @@ hr.border-dashed {
 .shift-card-morning { animation-delay: 0s; }
 .shift-card-evening { animation-delay: 0.1s; }
 
-/* Soft glowing gradient orb in the background, moves subtly on hover */
+
 .shift-card-glow {
     position: absolute;
     top: -60px;
@@ -1179,7 +1177,7 @@ hr.border-dashed {
     }
 }
 
-/* Edit form panel — subtle entrance animation */
+
 .shift-form-panel {
     animation: shiftCardIn 0.4s ease both;
 }

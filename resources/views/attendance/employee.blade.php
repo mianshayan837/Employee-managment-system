@@ -44,7 +44,7 @@
                             <td><span class="leave-status-pill {{ $day['color'] }}">{{ $day['label'] }}</span></td>
                             <td class="pe-4 text-end">
                                 @if ($day['status'] !== 'weekend' && $day['status'] !== 'upcoming')
-                                    <button type="button" class="btn btn-sm btn-outline-ink edit-attendance-btn"
+                                    <button type="button" class="btn btn-ink edit-attendance-btn"
                                         data-date="{{ $day['date']->format('Y-m-d') }}"
                                         data-date-label="{{ $day['date']->format('d M Y') }}"
                                         data-status="{{ $day['record']->status ?? '' }}"

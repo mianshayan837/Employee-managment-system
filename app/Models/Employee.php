@@ -25,9 +25,6 @@ class Employee extends Model
         'salary',
         'joining_date',
         'status',
-        'annual_leave_balance',
-        'sick_leave_balance',
-        'casual_leave_balance',
     ];
 
     protected function casts(): array
@@ -71,6 +68,30 @@ class Employee extends Model
         return str_starts_with($this->profile_image, 'http')
             ? $this->profile_image
             : Storage::disk('public')->url($this->profile_image);
+    }
+    public function usedLeaveDays(string $type): int
+    {
+        return (int) $this->leaveRequests()
+            ->where('type', $type)
+            ->where('status', 'approved')
+            ->sum('days');
+    }
+
+    public function totalLeaveAllowance(string $type): int
+    {
+        $settings = LeaveSetting::current();
+
+        return match ($type) {
+            'annual' => $settings->annual_default,
+            'sick' => $settings->sick_default,
+            'casual' => $settings->casual_default,
+            default => 0,
+        };
+    }
+
+    public function remainingLeaveDays(string $type): int
+    {
+        return max(0, $this->totalLeaveAllowance($type) - $this->usedLeaveDays($type));
     }
 
     public function scopeSearch($query, ?string $term)

@@ -8,13 +8,19 @@ class EmployeeDashboardController extends Controller
 {
     public function index()
     {
-        $employee = Auth::user()->employee()->with('department')->firstOrFail();
+        $employee = Auth::user()->employee()->with(['department', 'shift'])->firstOrFail();
 
         $recentLeaves = $employee->leaveRequests()
             ->latest()
             ->take(5)
             ->get();
 
-        return view('employees.dashboard', compact('employee', 'recentLeaves'));
+        $leaveBalances = [
+            'annual' => $employee->remainingLeaveDays('annual'),
+            'sick' => $employee->remainingLeaveDays('sick'),
+            'casual' => $employee->remainingLeaveDays('casual'),
+        ];
+
+        return view('employees.dashboard', compact('employee', 'recentLeaves', 'leaveBalances'));
     }
 }

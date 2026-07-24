@@ -38,11 +38,11 @@ class LeaveController extends Controller
         $days = \Carbon\Carbon::parse($validated['start_date'])
             ->diffInDays(\Carbon\Carbon::parse($validated['end_date'])) + 1;
 
-        $balanceField = $validated['type'].'_leave_balance';
+        $remaining = $employee->remainingLeaveDays($validated['type']);
 
-        if ($employee->$balanceField < $days) {
+        if ($remaining < $days) {
             return back()->withInput()->with('error',
-                'Not enough '.$validated['type'].' leave balance. Available: '.$employee->$balanceField.' days.'
+                'Not enough '.$validated['type'].' leave balance. Available: '.$remaining.' days.'
             );
         }
 

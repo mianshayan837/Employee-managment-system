@@ -7,7 +7,7 @@
     <div class="mb-4">
         <p class="eyebrow mb-2">Shift Management</p>
         <h1 class="font-display fw-semibold text-ink mb-0">Shifts</h1>
-        <p class="text-slate mb-0">Only two fixed same-day shifts exist in the system.</p>
+        <p class="text-slate mb-0">Only two fixed same-day shifts are available in the system.</p>
     </div>
 
     <div class="row g-4">
